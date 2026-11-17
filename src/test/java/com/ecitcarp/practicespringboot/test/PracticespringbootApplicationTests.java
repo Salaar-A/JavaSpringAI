@@ -10,4 +10,9 @@ class PracticespringbootApplicationTests {
 	void contextLoads() {
 	}
 
+	@Test
+	void printName(){
+		System.out.println("HEllo Junit");
+	}
+
 }
