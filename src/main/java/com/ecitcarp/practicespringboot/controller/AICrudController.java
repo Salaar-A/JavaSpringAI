@@ -6,7 +6,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
+import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
+import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,13 +25,16 @@ public class AICrudController {
 
     private final ChatMemory chatMemory;
 
+    private final VectorStore vectorStore;
+
     @Value("classpath:/prompts/movies.st")
     private Resource movieTemplate;
 
-    public AICrudController(ChatClient.Builder builder, ChatMemory chatMemory) {
+    public AICrudController(ChatClient.Builder builder, ChatMemory chatMemory,VectorStore vectorStore) {
         this.chatClient = builder
                 .build();
         this.chatMemory = chatMemory;
+        this.vectorStore = vectorStore;
     }
 
     @GetMapping("/callAI")
@@ -50,5 +55,15 @@ public class AICrudController {
                 .user(u-> u.text(movieTemplate).param("mood",mood).param("language",language))
                 .call()
                 .entity(Movie.class);
+    }
+
+    @GetMapping("/docs")
+    public String askDocs(@RequestParam String question) {
+        return chatClient.prompt()
+                .system("Be friendly and answer to me as a assistant")
+                .user(question)
+                .advisors(QuestionAnswerAdvisor.builder(vectorStore).build())
+                .call()
+                .content();
     }
 }
