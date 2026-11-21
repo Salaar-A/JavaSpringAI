@@ -74,7 +74,7 @@ public class AICrudController {
                 .system("""
                         You are an HR assistant.
                         Only call a tool if the question is about an employee's leave balance.
-                        For any other question, answer directly without calling tools.
+                        For any other question, answer directly without calling tools. Ok
                         """)
                 .user(question)
                 .tools(new LeaveTools())
