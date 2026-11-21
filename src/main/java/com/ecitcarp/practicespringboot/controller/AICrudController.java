@@ -1,6 +1,7 @@
 package com.ecitcarp.practicespringboot.controller;
 
 import com.ecitcarp.practicespringboot.dto.Movie;
+import com.ecitcarp.practicespringboot.service.LeaveTools;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -63,6 +64,20 @@ public class AICrudController {
                 .system("Be friendly and answer to me as a assistant")
                 .user(question)
                 .advisors(QuestionAnswerAdvisor.builder(vectorStore).build())
+                .call()
+                .content();
+    }
+
+    @GetMapping("/leaveinfo")
+    public String leaveInfo(@RequestParam String question) {
+        return chatClient.prompt()
+                .system("""
+                        You are an HR assistant.
+                        Only call a tool if the question is about an employee's leave balance.
+                        For any other question, answer directly without calling tools.
+                        """)
+                .user(question)
+                .tools(new LeaveTools())
                 .call()
                 .content();
     }
